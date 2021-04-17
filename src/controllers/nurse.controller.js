@@ -1,12 +1,33 @@
 const { config } = require("../configs/pg.config");
 
-async function getNurse(req, res, next) {
+async function getAllNurse(req, res, next) {
   const conn = await config.getConnection();
   // Begin transaction
   await conn.beginTransaction();
   try {
     let [rows, fields] = await conn.query("SELECT * FROM nurse");
     let nurse = rows;
+    await conn.commit();
+    return res.send(nurse);
+  } catch (err) {
+    await conn.rollback();
+    return res.status(500).json(err);
+  } finally {
+    console.log("finally");
+    conn.release();
+  }
+}
+
+async function getNurse(req, res, next) {
+  const conn = await config.getConnection();
+  // Begin transaction
+  await conn.beginTransaction();
+  try {
+    let [rows, fields] = await conn.query(
+      "SELECT * FROM nurse WHERE n_id = ?",
+      [req.params.id]
+    );
+    let nurse = rows[0];
     await conn.commit();
     return res.send(nurse);
   } catch (err) {
@@ -29,12 +50,36 @@ async function createNurse(req, res, next) {
   // Begin transaction
   await conn.beginTransaction();
   try {
-    await conn.query(
-      "INSERT INTO nurse(ID, n_fname, n_lname, username, password) VALUES (?, ?, ?, ?, ?);",
-      [ID, n_fname, n_lname, username, password]
+    let [rows1, fields1] = await conn.query(
+      "SELECT * FROM nurse WHERE ID = ?",
+      [ID]
     );
-    await conn.commit();
-    return res.send("nurse register complete!");
+    let checkID = rows1;
+    if (checkID !== []) {
+      return res.status(400).json({
+        message: "Cannot register, already have ID",
+      });
+    } else {
+      let [
+        rows2,
+        fields2,
+      ] = await conn.query("SELECT * FROM nurse WHERE username = ?", [
+        username,
+      ]);
+      let checkUsername = rows2;
+      if (checkUsername !== []) {
+        return res.status(400).json({
+          message: "username is already used",
+        });
+      } else {
+        await conn.query(
+          "INSERT INTO nurse(ID, n_fname, n_lname, username, password) VALUES (?, ?, ?, ?, ?);",
+          [ID, n_fname, n_lname, username, password]
+        );
+        await conn.commit();
+        return res.send("nurse register complete!");
+      }
+    }
   } catch (err) {
     await conn.rollback();
     return res.status(500).json(err);
@@ -45,7 +90,6 @@ async function createNurse(req, res, next) {
 }
 
 async function updateNurse(req, res, next) {
-  const ID = req.body.ID;
   const n_fname = req.body.n_fname;
   const n_lname = req.body.n_lname;
   const username = req.body.username;
@@ -56,8 +100,8 @@ async function updateNurse(req, res, next) {
   await conn.beginTransaction();
   try {
     await conn.query(
-      "UPDATE nurse SET ID = ?, n_fname = ?, n_lname = ?, username = ?, password = ? WHERE n_id = ?;",
-      [ID, n_fname, n_lname, username, password, req.params.id]
+      "UPDATE nurse SET n_fname = ?, n_lname = ?, username = ?, password = ? WHERE n_id = ?;",
+      [n_fname, n_lname, username, password, req.params.id]
     );
     await conn.commit();
     return res.send("update nurse id : " + req.params.id + " complete!");
@@ -70,4 +114,4 @@ async function updateNurse(req, res, next) {
   }
 }
 
-module.exports = { getNurse, createNurse, updateNurse };
+module.exports = { getAllNurse, getNurse, createNurse, updateNurse };

@@ -1,6 +1,6 @@
 const { config } = require("../configs/pg.config");
 
-async function getUsers(req, res, next) {
+async function getAllUsers(req, res, next) {
   const conn = await config.getConnection();
   // Begin transaction
   await conn.beginTransaction();
@@ -11,6 +11,27 @@ async function getUsers(req, res, next) {
     let user = rows;
     await conn.commit();
     return res.send(user);
+  } catch (err) {
+    await conn.rollback();
+    return res.status(500).json(err);
+  } finally {
+    console.log("finally");
+    conn.release();
+  }
+}
+
+async function getUsers(req, res, next) {
+  const conn = await config.getConnection();
+  // Begin transaction
+  await conn.beginTransaction();
+  try {
+    let [rows, fields] = await conn.query(
+      "SELECT * FROM users LEFT JOIN form_result USING (u_id) WHERE u_id = ?",
+      req.params.id
+    );
+    let result = rows[0];
+    await conn.commit();
+    return res.send(result);
   } catch (err) {
     await conn.rollback();
     return res.status(500).json(err);
@@ -105,7 +126,7 @@ async function updateUsers(req, res, next) {
   }
 }
 
-async function deleteUser(req, res, next) {
+async function deleteUsers(req, res, next) {
   const conn = await config.getConnection();
   // Begin transaction
   await conn.beginTransaction();
@@ -118,7 +139,7 @@ async function deleteUser(req, res, next) {
       req.params.id,
     ]);
     let results = rows[0];
-    if (results.result_id !== null) {
+    if (results.result !== null) {
       return res
         .status(400)
         .json({ message: "Cannot delete, This user have result" });
@@ -152,4 +173,10 @@ async function deleteUser(req, res, next) {
   }
 }
 
-module.exports = { getUsers, createUsers, updateUsers, deleteUser };
+module.exports = {
+  getAllUsers,
+  getUsers,
+  createUsers,
+  updateUsers,
+  deleteUsers,
+};
