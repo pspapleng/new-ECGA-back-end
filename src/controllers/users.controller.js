@@ -42,7 +42,12 @@ async function getUsers(req, res, next) {
 }
 
 async function createUsers(req, res, next) {
-  const HN = req.body.HN;
+  //เติม 0 จนกว่าจะครบ 9 หลัก
+  function pad(num, size) {
+    num = num.toString();
+    while (num.length < size) num = "0" + num;
+    return num;
+  }
   const u_fname = req.body.u_fname;
   const u_lname = req.body.u_lname;
   const date_of_birth = req.body.date_of_birth; // yyyy-mm-dd ex. 1959-12-17
@@ -58,24 +63,44 @@ async function createUsers(req, res, next) {
   // Begin transaction
   await conn.beginTransaction();
   try {
-    await conn.query(
-      "INSERT INTO users (HN, u_fname, u_lname, date_of_birth, gender, service_date, height, weight, bmi, waistline, fall_history, n_id) VALUES (?, ?, ?, ?, ?, current_date(), ?, ?, ?, ?, ?, ?);",
-      [
-        HN,
-        u_fname,
-        u_lname,
-        date_of_birth,
-        gender,
-        height,
-        weight,
-        bmi,
-        waistline,
-        fall_history,
-        n_id,
-      ]
+    //check this user don't have result
+    let [
+      rows1,
+      fields1,
+    ] = await conn.query(
+      "SELECT * FROM users where u_fname = ? and u_lname = ?",
+      [u_fname, u_lname]
     );
-    await conn.commit();
-    return res.send("users register complete!");
+    let checkName = rows1;
+    if (checkName.length > 0) {
+      return res.status(400).json({
+        message: "Cannot register, already have user",
+      });
+    } else {
+      let [rows2, fields2] = await conn.query(
+        "SELECT u_id FROM users ORDER BY u_id DESC limit 1"
+      );
+      let latest_id = rows2[0].u_id;
+      let HN = pad(latest_id + 1, 9);
+      await conn.query(
+        "INSERT INTO users (HN, u_fname, u_lname, date_of_birth, gender, service_date, height, weight, bmi, waistline, fall_history, n_id) VALUES (?, ?, ?, ?, ?, current_date(), ?, ?, ?, ?, ?, ?);",
+        [
+          HN,
+          u_fname,
+          u_lname,
+          date_of_birth,
+          gender,
+          height,
+          weight,
+          bmi,
+          waistline,
+          fall_history,
+          n_id,
+        ]
+      );
+      await conn.commit();
+      return res.send("users register complete!");
+    }
   } catch (err) {
     await conn.rollback();
     return res.status(500).json(err);
@@ -133,18 +158,24 @@ async function deleteUsers(req, res, next) {
   try {
     //check this user don't have result
     let [
-      rows,
+      rows1,
       fields,
     ] = await conn.query("SELECT result_id FROM form_result where u_id = ?", [
       req.params.id,
     ]);
-    let results = rows[0];
-    if (results.result !== null) {
+    let checkResult = rows1;
+    if (checkResult.length > 0) {
       return res
         .status(400)
         .json({ message: "Cannot delete, This user have result" });
     } else {
-      await conn.query("DELETE from users WHERE u_id = ?;", [req.params.id]);
+      await conn.query(`DELETE from users WHERE u_id = ?;`, [req.params.id]);
+      //ค้นหา id ล่าสุด เพื่อไปเซตค่า AI
+      let [rows2, fields] = await conn.query(
+        "SELECT u_id FROM users ORDER BY u_id DESC limit 1"
+      );
+      let latest_id = rows2[0].u_id;
+      await conn.query(`ALTER TABLE users AUTO_INCREMENT = ? ;`, [latest_id]);
       await conn.commit();
       return res.send("delete user id : " + req.params.id + " complete!");
     }

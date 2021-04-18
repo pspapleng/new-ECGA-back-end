@@ -55,7 +55,7 @@ async function createNurse(req, res, next) {
       [ID]
     );
     let checkID = rows1;
-    if (checkID !== []) {
+    if (checkID.length > 0) {
       return res.status(400).json({
         message: "Cannot register, already have ID",
       });
@@ -67,9 +67,9 @@ async function createNurse(req, res, next) {
         username,
       ]);
       let checkUsername = rows2;
-      if (checkUsername !== []) {
+      if (checkUsername.length > 0) {
         return res.status(400).json({
-          message: "username is already used",
+          message: "username is already used ",
         });
       } else {
         await conn.query(

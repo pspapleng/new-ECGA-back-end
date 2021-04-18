@@ -19,7 +19,7 @@ async function getAllAns(req, res, next) {
 }
 
 //ข้อมูลจากตาราง form_ans ที่มี u_id = id
-async function getAns(req, res, next) {
+async function getAnsByUid(req, res, next) {
   const conn = await config.getConnection();
   // Begin transaction
   await conn.beginTransaction();
@@ -51,12 +51,26 @@ async function createAns(req, res, next) {
   // Begin transaction
   await conn.beginTransaction();
   try {
-    await conn.query(
-      "INSERT INTO form_ans (ans_title, ans_value, ans_time, ques_id, u_id) VALUES (?, ?, ?, ?, ?);",
-      [ans_title, ans_value, ans_time, ques_id, u_id]
+    let [
+      rows1,
+      fields1,
+    ] = await conn.query(
+      "SELECT * FROM form_ans WHERE (ans_time = ? and ques_id = ?) and u_id = ? ",
+      [ans_time, ques_id, u_id]
     );
-    await conn.commit();
-    return res.send("add ans complete!");
+    let checkAns = rows1;
+    if (checkAns.length > 0) {
+      return res.status(400).json({
+        message: "Cannot add duplicate answer",
+      });
+    } else {
+      await conn.query(
+        "INSERT INTO form_ans (ans_title, ans_value, ans_time, ques_id, u_id) VALUES (?, ?, ?, ?, ?);",
+        [ans_title, ans_value, ans_time, ques_id, u_id]
+      );
+      await conn.commit();
+      return res.send("add ans for ques : " + ques_id + " complete!");
+    }
   } catch (err) {
     await conn.rollback();
     return res.status(500).json(err);
@@ -68,6 +82,6 @@ async function createAns(req, res, next) {
 
 module.exports = {
   getAllAns,
-  getAns,
+  getAnsByUid,
   createAns,
 };

@@ -62,18 +62,54 @@ async function getResult(req, res, next) {
 
 async function createResult(req, res, next) {
   const result = req.body.result;
+  const result_date = req.body.result_date;
   const u_id = req.body.u_id;
 
   const conn = await config.getConnection();
   // Begin transaction
   await conn.beginTransaction();
   try {
-    await conn.query(
-      "INSERT INTO form_result (result, result_date, u_id) VALUES (?, current_date(), ?);",
-      [result, u_id]
+    let [
+      rows1,
+      fields1,
+    ] = await conn.query(
+      "SELECT * FROM form_result WHERE result_date = ? and u_id = ?",
+      [result_date, u_id]
     );
+    let checkResult = rows1;
+    if (checkResult.length > 0) {
+      return res.status(400).json({
+        message: "Cannot add duplicate result",
+      });
+    } else {
+      await conn.query(
+        "INSERT INTO form_result (result, result_date, u_id) VALUES (?, ?, ?);",
+        [JSON.stringify(result), result_date, u_id]
+      );
+      await conn.commit();
+      return res.send("add result complete!");
+    }
+  } catch (err) {
+    await conn.rollback();
+    return res.status(500).json(err);
+  } finally {
+    console.log("finally");
+    conn.release();
+  }
+}
+
+async function getLatestResultByUid(req, res, next) {
+  const conn = await config.getConnection();
+  // Begin transaction
+  await conn.beginTransaction();
+  try {
+    let [rows, fields] = await conn.query(
+      "SELECT * FROM form_result WHERE u_id = ? ORDER BY result_date DESC limit 1",
+      req.params.id
+    );
+    let result_date = rows;
     await conn.commit();
-    return res.send("add result complete!");
+    return res.send(result_date);
   } catch (err) {
     await conn.rollback();
     return res.status(500).json(err);
@@ -88,4 +124,5 @@ module.exports = {
   getResultByUid,
   getResult,
   createResult,
+  getLatestResultByUid,
 };
