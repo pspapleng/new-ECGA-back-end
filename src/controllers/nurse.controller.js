@@ -40,11 +40,12 @@ async function getNurse(req, res, next) {
 }
 
 async function createNurse(req, res, next) {
-  const ID = req.body.ID;
+  const ID = "ว" + req.body.id;
   const n_fname = req.body.n_fname;
   const n_lname = req.body.n_lname;
   const username = req.body.username;
   const password = req.body.password;
+  console.log(req.body);
 
   const conn = await config.getConnection();
   // Begin transaction
@@ -55,6 +56,7 @@ async function createNurse(req, res, next) {
       [ID]
     );
     let checkID = rows1;
+    console.log(checkID);
     if (checkID.length > 0) {
       return res.status(400).json({
         message: "Cannot register, already have ID",
