@@ -113,10 +113,10 @@ async function createUsers(req, res, next) {
 async function updateUsers(req, res, next) {
   const u_fname = req.body.u_fname;
   const u_lname = req.body.u_lname;
-  const date_of_birth = req.body.date_of_birth; // yyyy-mm-dd ex. 1959-12-17
   const gender = req.body.gender; //female = 1, male = 2
-  const height = req.body.height;
+  const date_of_birth = req.body.date_of_birth; // yyyy-mm-dd ex. 1959-12-17
   const weight = req.body.weight;
+  const height = req.body.height;
   const bmi = req.body.bmi; //คำนวณจาก height และ weight
   const waistline = req.body.waistline;
   const fall_history = req.body.fall_history;
@@ -203,6 +203,8 @@ async function deleteUsers(req, res, next) {
     conn.release();
   }
 }
+
+async function searchUsers(req, res, next) {}
 
 module.exports = {
   getAllUsers,
