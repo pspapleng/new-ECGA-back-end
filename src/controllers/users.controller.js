@@ -1,4 +1,5 @@
 const { config } = require("../configs/pg.config");
+const usersSchema = require("../schema/users.schema");
 
 async function getAllUsers(req, res, next) {
   const conn = await config.getConnection();
@@ -6,7 +7,7 @@ async function getAllUsers(req, res, next) {
   await conn.beginTransaction();
   try {
     let [rows, fields] = await conn.query(
-      "SELECT * FROM users LEFT JOIN form_result USING (u_id)"
+      "SELECT * FROM users right JOIN form_result USING (u_id)"
     );
     let user = rows;
     await conn.commit();
@@ -20,16 +21,16 @@ async function getAllUsers(req, res, next) {
   }
 }
 
-async function getUsers(req, res, next) {
+async function getUsersByUid(req, res, next) {
   const conn = await config.getConnection();
   // Begin transaction
   await conn.beginTransaction();
   try {
     let [rows, fields] = await conn.query(
-      "SELECT * FROM users LEFT JOIN form_result USING (u_id) WHERE u_id = ?",
+      "SELECT * FROM users left JOIN nurse USING (n_id) WHERE u_id = ?",
       req.params.id
     );
-    let result = rows[0];
+    let result = rows;
     await conn.commit();
     return res.send(result);
   } catch (err) {
@@ -82,6 +83,26 @@ async function createUsers(req, res, next) {
       );
       let latest_id = rows2[0].u_id;
       let HN = pad(latest_id + 1, 9);
+      // validate
+      try {
+        await usersSchema.validateAsync(
+          {
+            u_fname,
+            u_lname,
+            date_of_birth,
+            gender,
+            height,
+            weight,
+            bmi,
+            waistline,
+            fall_history,
+            n_id,
+          },
+          { abortEarly: false }
+        );
+      } catch (err) {
+        return res.status(400).json(err);
+      }
       await conn.query(
         "INSERT INTO users (HN, u_fname, u_lname, date_of_birth, gender, service_date, height, weight, bmi, waistline, fall_history, n_id) VALUES (?, ?, ?, ?, ?, current_date(), ?, ?, ?, ?, ?, ?);",
         [
@@ -208,7 +229,7 @@ async function searchUsers(req, res, next) {}
 
 module.exports = {
   getAllUsers,
-  getUsers,
+  getUsersByUid,
   createUsers,
   updateUsers,
   deleteUsers,

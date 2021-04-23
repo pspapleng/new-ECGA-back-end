@@ -24,7 +24,7 @@ async function getResultByUid(req, res, next) {
   await conn.beginTransaction();
   try {
     let [rows, fields] = await conn.query(
-      "SELECT * FROM form_result WHERE u_id = ?",
+      "SELECT * FROM users RIGHT JOIN form_result USING (u_id) JOIN nurse USING (n_id) WHERE u_id = ? order by result_date desc",
       req.params.id
     );
     let result = rows;
@@ -45,10 +45,10 @@ async function getResult(req, res, next) {
   await conn.beginTransaction();
   try {
     let [rows, fields] = await conn.query(
-      "SELECT * FROM form_result WHERE result_id = ?",
+      "SELECT * FROM users RIGHT JOIN form_result USING (u_id) JOIN nurse USING (n_id) WHERE result_id = ?",
       req.params.id
     );
-    let result = rows[0];
+    let result = rows;
     await conn.commit();
     return res.send(result);
   } catch (err) {
