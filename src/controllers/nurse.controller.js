@@ -1,4 +1,5 @@
 const { config } = require("../configs/pg.config");
+const nurseSchema = require("../schema/nurse.schema");
 
 async function getAllNurse(req, res, next) {
   const conn = await config.getConnection();
@@ -45,43 +46,36 @@ async function createNurse(req, res, next) {
   const n_lname = req.body.n_lname;
   const username = req.body.username;
   const password = req.body.password;
+  const confirm_password = req.body.confirm_password;
   console.log(req.body);
 
   const conn = await config.getConnection();
   // Begin transaction
   await conn.beginTransaction();
+  // validate
   try {
-    let [rows1, fields1] = await conn.query(
-      "SELECT * FROM nurse WHERE ID = ?",
-      [ID]
-    );
-    let checkID = rows1;
-    // console.log(checkID);
-    if (checkID.length > 0) {
-      return res.status(400).json({
-        message: "Cannot register, already have ID",
-      });
-    } else {
-      let [
-        rows2,
-        fields2,
-      ] = await conn.query("SELECT * FROM nurse WHERE username = ?", [
+    await nurseSchema.validateAsync(
+      {
+        ID,
+        n_fname,
+        n_lname,
         username,
-      ]);
-      let checkUsername = rows2;
-      if (checkUsername.length > 0) {
-        return res.status(400).json({
-          message: "Cannot register, username is already used",
-        });
-      } else {
-        await conn.query(
-          "INSERT INTO nurse(ID, n_fname, n_lname, username, password) VALUES (?, ?, ?, ?, ?);",
-          [ID, n_fname, n_lname, username, password]
-        );
-        await conn.commit();
-        return res.send("nurse register complete!");
-      }
-    }
+        password,
+        confirm_password,
+      },
+      { abortEarly: false }
+    );
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json(err);
+  }
+  try {
+    await conn.query(
+      "INSERT INTO nurse(ID, n_fname, n_lname, username, password) VALUES (?, ?, ?, ?, ?);",
+      [ID, n_fname, n_lname, username, password]
+    );
+    await conn.commit();
+    return res.send("nurse register complete!");
   } catch (err) {
     await conn.rollback();
     return res.status(500).json(err);

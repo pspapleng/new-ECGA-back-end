@@ -53,10 +53,10 @@ async function createUsers(req, res, next) {
   const u_lname = req.body.u_lname;
   const date_of_birth = req.body.date_of_birth; // yyyy-mm-dd ex. 1959-12-17
   const gender = req.body.gender; //female = 1, male = 2
-  const height = req.body.height;
-  const weight = req.body.weight;
-  const bmi = req.body.bmi; //คำนวณจาก height และ weight
-  const waistline = req.body.waistline;
+  const height = req.body.height.toString();
+  const weight = req.body.weight.toString();
+  const bmi = req.body.bmi.toString(); //คำนวณจาก height และ weight
+  const waistline = req.body.waistline.toString();
   const fall_history = req.body.fall_history;
   const n_id = req.body.n_id; //พยาบาลที่ login อยู่ === ผู้ซักประวัติ
 
@@ -64,7 +64,7 @@ async function createUsers(req, res, next) {
   // Begin transaction
   await conn.beginTransaction();
   try {
-    //check this user don't have result
+    //check don't have this user
     let [
       rows1,
       fields1,
@@ -101,6 +101,7 @@ async function createUsers(req, res, next) {
           { abortEarly: false }
         );
       } catch (err) {
+        console.log(err);
         return res.status(400).json(err);
       }
       await conn.query(
