@@ -7,7 +7,19 @@ async function getAllUsers(req, res, next) {
   await conn.beginTransaction();
   try {
     let [rows, fields] = await conn.query(
-      "SELECT * FROM users right JOIN form_result USING (u_id)"
+      `select *
+      from users u
+      left join (select n_id, n_fname, n_lname
+            from nurse) n
+      on (u.n_id = n.n_id)
+      left join form_result
+      using (u_id)
+      where result_id in (select max(result_id)
+      from form_result
+      group by u_id
+      having max(result_id))
+      or result_id is null
+      order by u_id`
     );
     let user = rows;
     await conn.commit();
@@ -27,7 +39,18 @@ async function getUsersByUid(req, res, next) {
   await conn.beginTransaction();
   try {
     let [rows, fields] = await conn.query(
-      "SELECT * FROM users left JOIN nurse USING (n_id) WHERE u_id = ?",
+      `select *
+      from users u
+      left join (select n_id, n_fname, n_lname
+            from nurse) n
+            on (u.n_id = n.n_id)
+      left join form_result
+      using (u_id)
+      where result_id = (select max(result_id)
+      from form_result
+      where u_id = ?
+      group by u_id
+      having max(result_id))`,
       req.params.id
     );
     let result = rows;
