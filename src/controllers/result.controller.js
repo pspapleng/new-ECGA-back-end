@@ -1,4 +1,5 @@
 const { config } = require("../configs/pg.config");
+const resultSchema = require("../schema/result.schema");
 
 async function getAllResult(req, res, next) {
   const conn = await config.getConnection();
@@ -39,7 +40,7 @@ async function getResultByUid(req, res, next) {
   }
 }
 
-async function getResult(req, res, next) {
+async function getResultByResultid(req, res, next) {
   const conn = await config.getConnection();
   // Begin transaction
   await conn.beginTransaction();
@@ -68,6 +69,20 @@ async function createResult(req, res, next) {
   const conn = await config.getConnection();
   // Begin transaction
   await conn.beginTransaction();
+  // validate
+  try {
+    await resultSchema.validateAsync(
+      {
+        result,
+        result_date,
+        u_id,
+      },
+      { abortEarly: false }
+    );
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json(err);
+  }
   try {
     let [
       rows1,
@@ -122,7 +137,7 @@ async function getLatestResultByUid(req, res, next) {
 module.exports = {
   getAllResult,
   getResultByUid,
-  getResult,
+  getResultByResultid,
   createResult,
   getLatestResultByUid,
 };

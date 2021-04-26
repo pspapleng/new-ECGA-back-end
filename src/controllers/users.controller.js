@@ -101,6 +101,7 @@ async function createUsers(req, res, next) {
         message: "Cannot register, already have user",
       });
     } else {
+      // run HN
       let [rows2, fields2] = await conn.query(
         "SELECT u_id FROM users ORDER BY u_id DESC limit 1"
       );
@@ -158,17 +159,39 @@ async function createUsers(req, res, next) {
 async function updateUsers(req, res, next) {
   const u_fname = req.body.u_fname;
   const u_lname = req.body.u_lname;
-  const gender = req.body.gender; //female = 1, male = 2
   const date_of_birth = req.body.date_of_birth; // yyyy-mm-dd ex. 1959-12-17
-  const weight = req.body.weight;
-  const height = req.body.height;
-  const bmi = req.body.bmi; //คำนวณจาก height และ weight
-  const waistline = req.body.waistline;
+  const gender = req.body.gender; //female = 1, male = 2
+  const height = req.body.height.toString();
+  const weight = req.body.weight.toString();
+  const bmi = req.body.bmi.toString(); //คำนวณจาก height และ weight
+  const waistline = req.body.waistline.toString();
   const fall_history = req.body.fall_history;
+  const n_id = req.body.n_id; //พยาบาลที่ login อยู่ === ผู้แก้ไขเป็นพยาบาลจริง ไม่ต้องแก้ลงดาต้าเบส
 
   const conn = await config.getConnection();
   // Begin transaction
   await conn.beginTransaction();
+  // validate
+  try {
+    await usersSchema.validateAsync(
+      {
+        u_fname,
+        u_lname,
+        date_of_birth,
+        gender,
+        height,
+        weight,
+        bmi,
+        waistline,
+        fall_history,
+        n_id
+      },
+      { abortEarly: false }
+    );
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json(err);
+  }
   try {
     await conn.query(
       "UPDATE users SET u_fname = ?, u_lname = ?, date_of_birth = ?, gender = ?, height = ?, weight = ?, bmi = ?, waistline = ?, fall_history = ? WHERE u_id = ?;",

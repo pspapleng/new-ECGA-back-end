@@ -9,11 +9,10 @@ const idValidator = async (value, helpers) => {
     const message = "This ID is already have";
     throw new Joi.ValidationError(message, { message });
   }
-  if (!value.length == 11) {
-    throw new Joi.ValidationError("ID must contain 11 characters");
-  }
   if (!value.match(/^ว+\d{11}$/)) {
-    throw new Joi.ValidationError("ID invalid");
+    ///^ว+\d{11}$/
+    const message = "ID must contain 11 characters or ID invalid";
+    throw new Joi.ValidationError(message, { message });
   }
   return value;
 };
@@ -28,9 +27,6 @@ const usernameValidator = async (value, helpers) => {
   if (rows.length > 0) {
     const message = "This username is already taken";
     throw new Joi.ValidationError(message, { message });
-  }
-  if (value.length < 5 || value.length > 15) {
-    throw new Joi.ValidationError("ID must contain 5 - 15 characters");
   }
   return value;
 };

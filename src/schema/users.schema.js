@@ -24,7 +24,7 @@ const usersSchema = Joi.object({
     .min(2)
     .max(20)
     .regex(/^[ก-์a-zA-Z]*$/),
-  date_of_birth: Joi.date().required(),
+  date_of_birth: Joi.date().required().less("now"),
   gender: Joi.number().integer().required().min(1).max(2),
   height: Joi.string()
     .required()

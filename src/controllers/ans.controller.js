@@ -1,4 +1,6 @@
+const Joi = require("joi");
 const { config } = require("../configs/pg.config");
+const ansSchema = require("../schema/ans.schema");
 
 async function getAllAns(req, res, next) {
   const conn = await config.getConnection();
@@ -41,15 +43,17 @@ async function getAnsByUid(req, res, next) {
 }
 
 async function createAns(req, res, next) {
-  const ans_title = req.body.ans_title;
-  const ans_value = req.body.ans_value;
-  const ans_time = req.body.ans_time;
-  const ques_id = req.body.ques_id;
-  const u_id = req.body.u_id;
-
+  const ans = req.body;
   const conn = await config.getConnection();
   // Begin transaction
   await conn.beginTransaction();
+  // validate
+  try {
+    await ansSchema.validateAsync(ans);
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json(err);
+  }
   try {
     let [
       rows1,

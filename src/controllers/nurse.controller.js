@@ -47,7 +47,7 @@ async function createNurse(req, res, next) {
   const username = req.body.username;
   const password = req.body.password;
   const confirm_password = req.body.confirm_password;
-  console.log(req.body);
+  // console.log(req.body);
 
   const conn = await config.getConnection();
   // Begin transaction
