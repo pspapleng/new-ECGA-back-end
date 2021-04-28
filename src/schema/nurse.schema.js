@@ -5,6 +5,7 @@ const idValidator = async (value, helpers) => {
   const [rows, _] = await config.query("SELECT ID FROM nurse WHERE ID = ?", [
     value,
   ]);
+  console.log(rows);
   if (rows.length > 0) {
     const message = "This ID is already have";
     throw new Joi.ValidationError(message, { message });

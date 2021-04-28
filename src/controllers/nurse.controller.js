@@ -49,7 +49,7 @@ async function createNurse(req, res, next) {
   const confirm_password = req.body.confirm_password;
   console.log(ID);
 
-
+  // validate
   try {
     await nurseSchema.validateAsync(
       {
@@ -66,11 +66,10 @@ async function createNurse(req, res, next) {
     console.log(err);
     return res.status(400).json(err);
   }
+  const conn = await config.getConnection();
+  // Begin transaction
+  await conn.beginTransaction();
   try {
-    const conn = await config.getConnection();
-    // Begin transaction
-    await conn.beginTransaction();
-    // validate
     await conn.query(
       "INSERT INTO nurse(ID, n_fname, n_lname, username, password) VALUES (?, ?, ?, ?, ?);",
       [ID, n_fname, n_lname, username, password]

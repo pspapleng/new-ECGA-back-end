@@ -80,10 +80,10 @@ async function createResult(req, res, next) {
     console.log(err);
     return res.status(400).json(err);
   }
+  const conn = await config.getConnection();
+  // Begin transaction
+  await conn.beginTransaction();
   try {
-    const conn = await config.getConnection();
-    // Begin transaction
-    await conn.beginTransaction();
     let [
       rows1,
       fields1,

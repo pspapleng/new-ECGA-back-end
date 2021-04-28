@@ -60,10 +60,10 @@ async function createAns(req, res, next) {
   const check = isEverythingUnique(ans, "ques_id");
   console.log(check);
   if (check) {
+    const conn = await config.getConnection();
+    // Begin transaction
+    await conn.beginTransaction();
     try {
-      const conn = await config.getConnection();
-      // Begin transaction
-      await conn.beginTransaction();
       let [
         rows1,
         fields1,
