@@ -47,12 +47,9 @@ async function createNurse(req, res, next) {
   const username = req.body.username;
   const password = req.body.password;
   const confirm_password = req.body.confirm_password;
-  // console.log(req.body);
+  console.log(ID);
 
-  const conn = await config.getConnection();
-  // Begin transaction
-  await conn.beginTransaction();
-  // validate
+
   try {
     await nurseSchema.validateAsync(
       {
@@ -70,6 +67,10 @@ async function createNurse(req, res, next) {
     return res.status(400).json(err);
   }
   try {
+    const conn = await config.getConnection();
+    // Begin transaction
+    await conn.beginTransaction();
+    // validate
     await conn.query(
       "INSERT INTO nurse(ID, n_fname, n_lname, username, password) VALUES (?, ?, ?, ?, ?);",
       [ID, n_fname, n_lname, username, password]

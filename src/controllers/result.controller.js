@@ -66,9 +66,6 @@ async function createResult(req, res, next) {
   const result_date = req.body.result_date;
   const u_id = req.body.u_id;
 
-  const conn = await config.getConnection();
-  // Begin transaction
-  await conn.beginTransaction();
   // validate
   try {
     await resultSchema.validateAsync(
@@ -84,6 +81,9 @@ async function createResult(req, res, next) {
     return res.status(400).json(err);
   }
   try {
+    const conn = await config.getConnection();
+    // Begin transaction
+    await conn.beginTransaction();
     let [
       rows1,
       fields1,

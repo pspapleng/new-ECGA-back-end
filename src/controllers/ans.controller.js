@@ -44,9 +44,7 @@ async function getAnsByUid(req, res, next) {
 
 async function createAns(req, res, next) {
   const ans = req.body;
-  const conn = await config.getConnection();
-  // Begin transaction
-  await conn.beginTransaction();
+
   // validate
   try {
     await ansSchema.validateAsync(ans);
@@ -63,6 +61,9 @@ async function createAns(req, res, next) {
   console.log(check);
   if (check) {
     try {
+      const conn = await config.getConnection();
+      // Begin transaction
+      await conn.beginTransaction();
       let [
         rows1,
         fields1,
