@@ -199,13 +199,21 @@ async function updateUsers(req, res, next) {
   const u_fname = req.body.u_fname;
   const u_lname = req.body.u_lname;
   const date_of_birth = req.body.date_of_birth; // yyyy-mm-dd ex. 1959-12-17
-  const gender = req.body.gender; //female = 1, male = 2
+  let gender = req.body.gender; //female = 1, male = 2
   const height = req.body.height.toString();
   const weight = req.body.weight.toString();
   const bmi = req.body.bmi.toString(); //คำนวณจาก height และ weight
   const waistline = req.body.waistline.toString();
   const fall_history = req.body.fall_history;
-  const n_id = req.body.n_id; //พยาบาลที่ login อยู่ === ผู้แก้ไขเป็นพยาบาลจริง ไม่ต้องแก้ลงดาต้าเบส
+  let n_id = req.body.n_id; //พยาบาลที่ login อยู่ === ผู้แก้ไขเป็นพยาบาลจริง ไม่ต้องแก้ลงดาต้าเบส
+
+  if (gender == "Female") {
+    gender = 1;
+  } else {
+    gender = 2;
+  }
+
+  n_id = 1;
 
   const conn = await config.getConnection();
   // Begin transaction

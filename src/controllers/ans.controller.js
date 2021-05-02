@@ -48,13 +48,21 @@ async function getAnsByResultid(req, res, next) {
   // Begin transaction
   await conn.beginTransaction();
   try {
-    let [rows, fields] = await conn.query(
+    let [rows1, fields1] = await conn.query(
       "SELECT * FROM form_ans WHERE result_id = ?",
       req.params.id
     );
-    let ans = rows;
+    let ans = rows1;
+    let [rows2, fields2] = await conn.query(
+      "SELECT u.* FROM form_result r RIGHT JOIN users u ON u.u_id = r.u_id WHERE result_id = ?",
+      req.params.id
+    );
+    let user = rows2[0];
     await conn.commit();
-    return res.send(ans);
+    return res.send({
+      user,
+      ans,
+    });
   } catch (err) {
     await conn.rollback();
     return res.status(500).json(err);
