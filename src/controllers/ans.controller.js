@@ -42,6 +42,28 @@ async function getAnsByUid(req, res, next) {
   }
 }
 
+//ข้อมูลจากตาราง form_ans ที่มี result_id = id
+async function getAnsByResultid(req, res, next) {
+  const conn = await config.getConnection();
+  // Begin transaction
+  await conn.beginTransaction();
+  try {
+    let [rows, fields] = await conn.query(
+      "SELECT * FROM form_ans WHERE result_id = ?",
+      req.params.id
+    );
+    let ans = rows;
+    await conn.commit();
+    return res.send(ans);
+  } catch (err) {
+    await conn.rollback();
+    return res.status(500).json(err);
+  } finally {
+    console.log("finally");
+    conn.release();
+  }
+}
+
 async function createAns(req, res, next) {
   const ans = req.body;
 
@@ -132,6 +154,7 @@ async function getLatestAnsByUid(req, res, next) {
 module.exports = {
   getAllAns,
   getAnsByUid,
+  getAnsByResultid,
   createAns,
   getLatestAnsByUid,
 };
