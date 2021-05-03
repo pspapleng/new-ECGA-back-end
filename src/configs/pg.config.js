@@ -5,7 +5,7 @@ const config = mysql.createPool({
   user: "root",
   port: 3306,
   password: "pleang3343",
-  database: "last-ecga",
+  database: "test-ecga",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,

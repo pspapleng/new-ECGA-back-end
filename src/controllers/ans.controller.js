@@ -54,7 +54,7 @@ async function getAnsByResultid(req, res, next) {
     );
     let ans = rows1;
     let [rows2, fields2] = await conn.query(
-      "SELECT u.* FROM form_result r RIGHT JOIN users u ON u.u_id = r.u_id WHERE result_id = ?",
+      "SELECT * FROM form_result r RIGHT JOIN users u ON u.u_id = r.u_id WHERE result_id = ?",
       req.params.id
     );
     let user = rows2[0];
