@@ -25,7 +25,7 @@ async function getResultByUid(req, res, next) {
   await conn.beginTransaction();
   try {
     let [rows, fields] = await conn.query(
-      "SELECT * FROM users RIGHT JOIN form_result USING (u_id) JOIN nurse USING (n_id) WHERE u_id = ? order by result_date desc",
+      "SELECT * FROM users RIGHT JOIN form_result USING (u_id) JOIN nurse USING (n_id) WHERE u_id = ? order by result_date",
       req.params.id
     );
     let result = rows;

@@ -14,7 +14,7 @@ async function getAllUsers(req, res, next) {
       left join (select n_id, n_fname, n_lname
             from nurse) n
       on (u.n_id = n.n_id)
-      left join form_result
+      join form_result
       using (u_id)
       where result_id in (select max(result_id)
       from form_result
@@ -30,7 +30,7 @@ async function getAllUsers(req, res, next) {
       left join (select n_id, n_fname, n_lname
             from nurse) n
       on (u.n_id = n.n_id)
-      left join form_result
+      join form_result
       using (u_id)
       where (result_id in (select max(result_id)
       from form_result
@@ -44,25 +44,6 @@ async function getAllUsers(req, res, next) {
     const [rows, fields] = await conn.query(sql, cond);
     await conn.commit();
     return res.json(rows);
-
-    // let [rows, fields] = await conn.query(
-    //   `select *
-    //   from users u
-    //   left join (select n_id, n_fname, n_lname
-    //         from nurse) n
-    //   on (u.n_id = n.n_id)
-    //   left join form_result
-    //   using (u_id)
-    //   where result_id in (select max(result_id)
-    //   from form_result
-    //   group by u_id
-    //   having max(result_id))
-    //   or result_id is null
-    //   order by u_id`
-    // );
-    // let user = rows;
-    // await conn.commit();
-    // return res.send(user);
   } catch (err) {
     await conn.rollback();
     return res.status(500).json(err);

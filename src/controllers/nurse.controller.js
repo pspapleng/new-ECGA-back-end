@@ -1,5 +1,6 @@
 const { config } = require("../configs/pg.config");
 const nurseSchema = require("../schema/nurse.schema");
+const bcrypt = require("bcrypt");
 
 async function getAllNurse(req, res, next) {
   const conn = await config.getConnection();
@@ -41,14 +42,12 @@ async function getNurse(req, res, next) {
 }
 
 async function createNurse(req, res, next) {
-  const ID = "ว" + req.body.id;
+  const ID = "ว" + req.body.ID;
   const n_fname = req.body.n_fname;
   const n_lname = req.body.n_lname;
   const username = req.body.username;
-  const password = req.body.password;
+  let password = req.body.password;
   const confirm_password = req.body.confirm_password;
-  console.log(ID);
-
   // validate
   try {
     await nurseSchema.validateAsync(
@@ -66,6 +65,10 @@ async function createNurse(req, res, next) {
     console.log(err);
     return res.status(400).json(err);
   }
+
+  password = await bcrypt.hash(req.body.password, 5);
+  console.log(ID);
+
   const conn = await config.getConnection();
   // Begin transaction
   await conn.beginTransaction();

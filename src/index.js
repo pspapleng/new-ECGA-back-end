@@ -4,7 +4,9 @@ const route = require("./routes/index.route");
 const app = express();
 const port = process.env.PORT || 3000;
 var cors = require("cors");
+const { logger } = require("./middlewares");
 
+app.use(logger);
 app.use(cors());
 app.use(bodyParser.json());
 app.use(
