@@ -186,15 +186,14 @@ async function updateUsers(req, res, next) {
   const bmi = req.body.bmi.toString(); //คำนวณจาก height และ weight
   const waistline = req.body.waistline.toString();
   const fall_history = req.body.fall_history;
-  let n_id = req.body.n_id; //พยาบาลที่ login อยู่ === ผู้แก้ไขเป็นพยาบาลจริง ไม่ต้องแก้ลงดาต้าเบส
+  const n_id = req.body.n_id; //พยาบาลที่ login อยู่ === ผู้แก้ไขเป็นพยาบาลจริง ไม่ต้องแก้ลงดาต้าเบส
 
   if (gender == "Female") {
     gender = 1;
-  } else {
+  }
+  if (gender == "Male") {
     gender = 2;
   }
-
-  n_id = 1;
 
   const conn = await config.getConnection();
   // Begin transaction
