@@ -1,3 +1,5 @@
+const { config } = require("../configs/pg.config");
+
 async function logger(req, res, next) {
   const timestamp = new Date().toISOString().substring(0, 19);
   console.log(`${timestamp} | ${req.method}: ${req.originalUrl}`);
@@ -6,7 +8,7 @@ async function logger(req, res, next) {
 
 async function isLoggedIn(req, res, next) {
   let authorization = req.headers.authorization;
-
+  // console.log("auth", authorization);
   if (!authorization) {
     return res.status(401).send("You are not logged in");
   }
@@ -17,10 +19,13 @@ async function isLoggedIn(req, res, next) {
   }
 
   // Check token
-  const [tokens] = await pool.query("SELECT * FROM tokens WHERE token = ?", [
+  const [
+    tokens,
+  ] = await config.query("SELECT * FROM login_system WHERE refresh_token = ?", [
     part2,
   ]);
   const token = tokens[0];
+  console.log("token", tokens);
   if (!token) {
     return res.status(401).send("You are not logged in");
   }
@@ -28,13 +33,12 @@ async function isLoggedIn(req, res, next) {
   // Set user
   const [
     users,
-  ] = await pool.query(
-    "SELECT id, username, first_name, last_name, email, picture, mobile, join_date " +
-      "FROM users WHERE id = ?",
-    [token.user_id]
+  ] = await config.query(
+    "SELECT n_id, ID, n_fname, n_lname, username FROM nurse WHERE n_id = ?",
+    [token.n_id]
   );
   req.user = users[0];
-
+  console.log("User", users[0]);
   next();
 }
 

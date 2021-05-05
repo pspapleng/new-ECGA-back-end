@@ -275,22 +275,6 @@ async function deleteUsers(req, res, next) {
       await conn.commit();
       return res.send("delete user id : " + req.params.id + " complete!");
     }
-    // console.log(results);
-
-    // Delete the selected blog
-    // const [
-    //   rows2,
-    //   fields2,
-    // ] = await conn.query("DELETE FROM `blogs` WHERE `id` = ?", [
-    //   req.params.blogId,
-    // ]);
-
-    // if (rows2.affectedRows === 1) {
-    //   await conn.commit();
-    //   res.status(204).send();
-    // } else {
-    //   throw "Cannot delete the selected blog";
-    // }
   } catch (err) {
     await conn.rollback();
     return res.status(500).json(err);

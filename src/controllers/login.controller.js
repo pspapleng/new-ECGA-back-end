@@ -75,12 +75,12 @@ async function createLogin(req, res, next) {
     ]);
     const who = nurse[0];
     if (!who) {
-      throw new Error("Incorrect username");
+      throw new Error("Incorrect username or password");
     }
 
     // Check if password is correct
     if (!(await bcrypt.compare(password, who.password))) {
-      throw new Error("Incorrect password");
+      throw new Error("Incorrect username or password");
     }
 
     // Check if token already existed
@@ -106,25 +106,6 @@ async function createLogin(req, res, next) {
       conn.commit();
       res.status(200).json({ token: tokens[0].token });
     }
-
-    let [rows3, fields3] = await conn.query(
-      "SELECT * FROM nurse WHERE username = ? and password = ?",
-      username,
-      password
-    );
-    let result = rows3[0];
-    if (result !== null) {
-      await conn.query(
-        "INSERT INTO login_system (refresh_token, ExpiresAt, n_id) VALUES (?, ?, ?);",
-        [refresh_token, ExpiresAt, result.n_id]
-      );
-      await conn.commit();
-      return res.send("login complete!");
-    } else {
-      return res
-        .status(400)
-        .json({ message: "Cannot login, username or password wrong" });
-    }
   } catch (err) {
     await conn.rollback();
     return res.status(500).json(err.toString());
@@ -132,6 +113,10 @@ async function createLogin(req, res, next) {
     console.log("finally");
     conn.release();
   }
+}
+
+async function whoLogin(req, res, next) {
+  res.json(req.user);
 }
 
 async function deleteLogin(req, res, next) {
@@ -143,9 +128,7 @@ async function deleteLogin(req, res, next) {
       req.params.id,
     ]);
     await conn.commit();
-    return res.send(
-      "delete login_system of n_id : " + req.params.id + " complete!"
-    );
+    return res.send("n_id : " + req.params.id + " logout complete!");
   } catch (err) {
     await conn.rollback();
     return res.status(500).json(err);
@@ -159,5 +142,6 @@ module.exports = {
   getAllLogin,
   getLogin,
   createLogin,
+  whoLogin,
   deleteLogin,
 };
