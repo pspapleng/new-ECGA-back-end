@@ -1,4 +1,6 @@
 const { Router } = require("express");
+const { isLoggedIn } = require("../middlewares");
+
 const {
   getAllNurse,
   getNurse,
@@ -10,6 +12,6 @@ const nurseRoute = Router();
 nurseRoute.get("/", getAllNurse);
 nurseRoute.get("/:id", getNurse);
 nurseRoute.post("/", createNurse);
-nurseRoute.put("/:id", updateNurse);
+nurseRoute.put("/:id", isLoggedIn, updateNurse);
 
 module.exports = nurseRoute;

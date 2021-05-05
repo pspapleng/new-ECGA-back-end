@@ -1,4 +1,5 @@
 const { Router } = require("express");
+const { isLoggedIn } = require("../middlewares");
 
 const {
   getAllUsers,
@@ -9,10 +10,10 @@ const {
 } = require("../controllers/users.controller");
 const usersRoute = Router();
 
-usersRoute.get("/", getAllUsers);
-usersRoute.get("/:id", getUsersByUid);
-usersRoute.post("/", createUsers);
-usersRoute.put("/:id", updateUsers);
-usersRoute.delete("/:id", deleteUsers);
+usersRoute.get("/", isLoggedIn, getAllUsers);
+usersRoute.get("/:id", isLoggedIn, getUsersByUid);
+usersRoute.post("/", isLoggedIn, createUsers);
+usersRoute.put("/:id", isLoggedIn, updateUsers);
+usersRoute.delete("/:id", isLoggedIn, deleteUsers);
 
 module.exports = usersRoute;
