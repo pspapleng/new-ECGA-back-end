@@ -7,6 +7,7 @@ async function logger(req, res, next) {
 }
 
 async function isLoggedIn(req, res, next) {
+  console.log(req.headers);
   let authorization = req.headers.authorization;
   console.log("auth", authorization);
   if (!authorization) {

@@ -14,7 +14,7 @@ async function getAllUsers(req, res, next) {
       left join (select n_id, n_fname, n_lname
             from nurse) n
       on (u.n_id = n.n_id)
-      join form_result
+      left join form_result
       using (u_id)
       where result_id in (select max(result_id)
       from form_result
@@ -30,7 +30,7 @@ async function getAllUsers(req, res, next) {
       left join (select n_id, n_fname, n_lname
             from nurse) n
       on (u.n_id = n.n_id)
-      join form_result
+      left join form_result
       using (u_id)
       where (result_id in (select max(result_id)
       from form_result
