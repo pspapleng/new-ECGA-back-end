@@ -63,7 +63,6 @@ async function getResultByResultid(req, res, next) {
 
 async function createResult(req, res, next) {
   const result = req.body.result;
-  const result_date = req.body.result_date;
   const u_id = req.body.u_id;
 
   // validate
@@ -71,7 +70,6 @@ async function createResult(req, res, next) {
     await resultSchema.validateAsync(
       {
         result,
-        result_date,
         u_id,
       },
       { abortEarly: false }
@@ -88,8 +86,8 @@ async function createResult(req, res, next) {
       rows1,
       fields1,
     ] = await conn.query(
-      "SELECT * FROM form_result WHERE result_date = ? and u_id = ?",
-      [result_date, u_id]
+      "SELECT * FROM form_result WHERE result_date = current_date and u_id = ?",
+      [u_id]
     );
     let checkResult = rows1;
     if (checkResult.length > 0) {
@@ -98,8 +96,8 @@ async function createResult(req, res, next) {
       });
     } else {
       await conn.query(
-        "INSERT INTO form_result (result, result_date, u_id) VALUES (?, ?, ?);",
-        [JSON.stringify(result), result_date, u_id]
+        "INSERT INTO form_result (result, result_date, u_id) VALUES (?, current_date, ?);",
+        [JSON.stringify(result), u_id]
       );
       await conn.commit();
       return res.send("add result complete!");

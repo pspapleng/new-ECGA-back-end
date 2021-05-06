@@ -8,7 +8,7 @@ const usernameValidator = async (value, helpers) => {
   ] = await config.query("SELECT username FROM nurse WHERE username = ?", [
     value,
   ]);
-  if (rows.length > 0) {
+  if (rows.length > 1) {
     const message = "This username is already taken";
     throw new Joi.ValidationError(message, { message });
   }

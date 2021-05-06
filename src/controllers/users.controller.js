@@ -61,16 +61,10 @@ async function getUsersByUid(req, res, next) {
     let [rows, fields] = await conn.query(
       `select *
       from users u
-      left join (select n_id, n_fname, n_lname
+      join (select n_id, n_fname, n_lname
             from nurse) n
             on (u.n_id = n.n_id)
-      left join form_result
-      using (u_id)
-      where result_id = (select max(result_id)
-      from form_result
-      where u_id = ?
-      group by u_id
-      having max(result_id))`,
+      where u_id = ?`,
       req.params.id
     );
     let result = rows;

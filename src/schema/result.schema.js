@@ -29,7 +29,6 @@ const resultSchema = Joi.object({
     KNEE: Joi.string(),
     OSTA: Joi.string(),
   }),
-  result_date: Joi.date().required().less("now"),
   u_id: Joi.number().integer().required().external(uIdValidator),
 });
 
