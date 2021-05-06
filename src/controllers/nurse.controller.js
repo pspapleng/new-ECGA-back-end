@@ -1,6 +1,7 @@
 const { config } = require("../configs/pg.config");
 const nurseSchema = require("../schema/nurse.schema");
 const bcrypt = require("bcrypt");
+const { message } = require("../schema/ans.schema");
 
 async function getAllNurse(req, res, next) {
   const conn = await config.getConnection();
@@ -91,10 +92,32 @@ async function createNurse(req, res, next) {
 }
 
 async function updateNurse(req, res, next) {
+  const ID = req.body.id;
   const n_fname = req.body.n_fname;
   const n_lname = req.body.n_lname;
   const username = req.body.username;
-  const password = req.body.password;
+  let password = req.body.new_password;
+  const confirm_password = req.body.confirm_password;
+
+  // validate
+  try {
+    await nurseSchema.validateAsync(
+      {
+        ID,
+        n_fname,
+        n_lname,
+        username,
+        password,
+        confirm_password,
+      },
+      { abortEarly: false }
+    );
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json(err);
+  }
+
+  password = await bcrypt.hash(req.body.password, 5);
 
   const conn = await config.getConnection();
   // Begin transaction
@@ -115,4 +138,40 @@ async function updateNurse(req, res, next) {
   }
 }
 
-module.exports = { getAllNurse, getNurse, createNurse, updateNurse };
+async function checkPassword(req, res, next) {
+  const old_password = req.body.old_password;
+
+  const conn = await config.getConnection();
+  // Begin transaction
+  await conn.beginTransaction();
+  try {
+    let [nurse] = await conn.query("SELECT * FROM nurse WHERE n_id = ?", [
+      req.params.id,
+    ]);
+
+    let who = nurse[0];
+
+    // Check if password is correct
+    if (!(await bcrypt.compare(old_password, who.password))) {
+      await conn.commit();
+      return res.status(200).json({ message: "Incorrect password" });
+    } else {
+      await conn.commit();
+      return res.status(200).json({ message: "OK" });
+    }
+  } catch (err) {
+    await conn.rollback();
+    return res.status(500).json(err);
+  } finally {
+    console.log("finally");
+    conn.release();
+  }
+}
+
+module.exports = {
+  getAllNurse,
+  getNurse,
+  createNurse,
+  updateNurse,
+  checkPassword,
+};
