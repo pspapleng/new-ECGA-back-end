@@ -94,33 +94,19 @@ async function createAns(req, res, next) {
     // Begin transaction
     await conn.beginTransaction();
     try {
-      let [
-        rows1,
-        fields1,
-      ] = await conn.query(
-        "SELECT * FROM form_ans WHERE u_id = ? and result_id = ?",
-        [ans[0].u_id, ans[0].result_id]
+      const [rows, _] = await config.query(
+        "SELECT result_id FROM form_result order by result_id desc limit 1"
       );
-      let checkAns = rows1;
-      if (checkAns.length > 0) {
-        return res.status(400).json({
-          message: "Cannot add answer, already have answer",
-        });
-      } else {
-        for (let i = 0; i < ans.length; i++) {
-          await conn.query(
-            "INSERT INTO form_ans (ans_title, ans_value, ques_id, u_id, result_id) VALUES (?, ?, ?, ?, ?);",
-            [
-              ans[i].ans_title,
-              ans[i].ans_value,
-              ans[i].ques_id,
-              ans[i].u_id,
-              ans[i].result_id,
-            ]
-          );
-          await conn.commit();
-          return res.send("add ans complete!");
-        }
+      let id = rows[0].result_id;
+      console.log(id);
+
+      for (let i = 0; i < ans.length; i++) {
+        await conn.query(
+          "INSERT INTO form_ans (ans_title, ans_value, ques_id, u_id, result_id) VALUES (?, ?, ?, ?, ?);",
+          [ans[i].ans_title, ans[i].ans_value, ans[i].ques_id, ans[i].u_id, id]
+        );
+        await conn.commit();
+        return res.send("add ans complete!");
       }
     } catch (err) {
       await conn.rollback();

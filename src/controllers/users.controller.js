@@ -277,8 +277,6 @@ async function deleteUsers(req, res, next) {
   }
 }
 
-async function searchUsers(req, res, next) {}
-
 module.exports = {
   getAllUsers,
   getUsersByUid,

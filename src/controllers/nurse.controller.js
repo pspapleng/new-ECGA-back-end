@@ -140,18 +140,9 @@ async function updateNurse(req, res, next) {
         [n_fname, n_lname, username, password, req.params.id]
       );
       await conn.commit();
-      return res.status(200).json(
-        { message: "update nurse id : " + req.params.id + " complete!" },
-        {
-          who_login: {
-            n_id: req.body.n_id,
-            ID: req.body.ID,
-            n_fname: req.body.n_fname,
-            n_lname: req.body.n_lname,
-            username: req.body.username,
-          },
-        }
-      );
+      return res
+        .status(200)
+        .json({ message: "update nurse id : " + req.params.id + " complete!" });
     }
   } catch (err) {
     await conn.rollback();
