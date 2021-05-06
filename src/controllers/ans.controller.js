@@ -109,11 +109,10 @@ async function createAns(req, res, next) {
       } else {
         for (let i = 0; i < ans.length; i++) {
           await conn.query(
-            "INSERT INTO form_ans (ans_title, ans_value, ans_time, ques_id, u_id, result_id) VALUES (?, ?, ?, ?, ?, ?);",
+            "INSERT INTO form_ans (ans_title, ans_value, ques_id, u_id, result_id) VALUES (?, ?, ?, ?, ?);",
             [
               ans[i].ans_title,
               ans[i].ans_value,
-              ans[i].ans_time,
               ans[i].ques_id,
               ans[i].u_id,
               ans[i].result_id,

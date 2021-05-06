@@ -30,12 +30,11 @@ const resultIdValidator = async (value, helpers) => {
 
 const ansSchema = Joi.array()
   .required()
-  .length(162)
+  .length(163)
   .items(
     Joi.object({
       ans_title: Joi.string().required(),
       ans_value: Joi.number().required(),
-      ans_time: Joi.date().required(),
       ques_id: Joi.number().required().min(1).max(162),
       u_id: Joi.number().required().external(uIdValidator),
       result_id: Joi.number().required().external(resultIdValidator),
