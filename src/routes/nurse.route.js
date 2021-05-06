@@ -13,7 +13,7 @@ const nurseRoute = Router();
 nurseRoute.get("/", getAllNurse);
 nurseRoute.get("/:id", getNurse);
 nurseRoute.post("/", createNurse);
-nurseRoute.put("/:id", isLoggedIn, updateNurse);
+nurseRoute.put("/:id", updateNurse);
 nurseRoute.post("/check/:id", checkPassword);
 
 module.exports = nurseRoute;
