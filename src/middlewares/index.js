@@ -39,7 +39,7 @@ async function isLoggedIn(req, res, next) {
     [token.n_id]
   );
   req.user = users[0];
-  console.log("User", users[0]);
+  // console.log("User", users[0]);
   next();
 }
 

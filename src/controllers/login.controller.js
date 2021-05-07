@@ -88,7 +88,7 @@ async function createLogin(req, res, next) {
       "SELECT * FROM login_system WHERE n_id=?",
       [who.n_id]
     );
-    console.log(tokens);
+    // console.log(tokens);
     let token = !!tokens[0];
     if (!token) {
       // Generate and save token into database
